@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMBMS | Staff Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dashboard-body">
+    
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>HMBMS</h2>
+            <p>Staff Portal</p>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="staff-dashboard.html" class="active">Dashboard Summary</a></li>
+                <li><a href="inventory-scanner.html">Inventory & Barcode</a></li>
+                <li><a href="#">Lab Verifications</a></li>
+                <li><a href="#">Safe Dispensing</a></li>
+                <li><a href="#">Donor Profiles</a></li>
+                <li><a href="#">Reports</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <p>Logged in as: <strong>Nurse Clara</strong></p>
+            <a href="login.html" class="logout-btn">Secure Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        <header class="dashboard-header">
+            <h1>Dashboard Summary</h1>
+            <p>Overview of current milk bank operations and pending tasks.</p>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card warning">
+                <h3>Pending Lab Tests</h3>
+                <p class="stat-number">12 Batches</p>
+                <a href="#">View pending verifications &rarr;</a>
+            </div>
+            <div class="stat-card success">
+                <h3>Ready to Dispense (Preterm)</h3>
+                <p class="stat-number">4,500 mL</p>
+                <a href="#">Check active inventory &rarr;</a>
+            </div>
+            <div class="stat-card info">
+                <h3>Pending Inquiries</h3>
+                <p class="stat-number">3 Requests</p>
+                <a href="#">Match inventory &rarr;</a>
+            </div>
+        </section>
+
+        <section class="activity-section">
+            <h2>Recent Inventory Activity</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Batch ID</th>
+                        <th>Action Performed</th>
+                        <th>Staff ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10:42 AM</td>
+                        <td>#8492</td>
+                        <td>State updated: <span class="badge badge-pasteurized">Pasteurized</span></td>
+                        <td>Staff-04</td>
+                    </tr>
+                    <tr>
+                        <td>09:15 AM</td>
+                        <td>#8491</td>
+                        <td>State updated: <span class="badge badge-passed">Passed Lab Test</span></td>
+                        <td>Staff-12</td>
+                    </tr>
+                    <tr>
+                        <td>08:30 AM</td>
+                        <td>#8490</td>
+                        <td>State updated: <span class="badge badge-discarded">Discarded (Failed)</span></td>
+                        <td>Staff-12</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

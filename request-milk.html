@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMBMS | Request Milk</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">HMBMS</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="donate.html">Donate Milk</a></li>
+                <li><a href="status-check.html">Check Request Status</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="form-section">
+        <div class="form-container">
+            <h2>Request Human Milk</h2>
+            <p class="form-subtitle">Please provide your details below. <strong>We will send all status updates and availability alerts directly to your phone via SMS.</strong></p>
+            
+            <form action="/submit-inquiry" method="POST" class="standard-form">
+                
+                <fieldset>
+                    <legend>Beneficiary Details</legend>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mother_name">Mother's Full Name</label>
+                            <input type="text" id="mother_name" name="mother_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact_number">Contact Number (For SMS Updates)</label>
+                            <input type="tel" id="contact_number" name="contact_number" placeholder="e.g., 09123456789" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="infant_name">Infant's Full Name</label>
+                            <input type="text" id="infant_name" name="infant_name" required>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="is_nicu" name="is_nicu">
+                            <label for="is_nicu">Is the infant currently admitted to the NICU?</label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Request Details</legend>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="required_milk_type">Required Milk Type</label>
+                            <select id="required_milk_type" name="required_milk_type" required>
+                                <option value="">Select type...</option>
+                                <option value="Preterm">Preterm</option>
+                                <option value="Term">Term</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="medical_notes">Additional Medical Notes (Optional)</label>
+                        <textarea id="medical_notes" name="medical_notes" rows="3" placeholder="Any specific dietary requirements or medical context..."></textarea>
+                    </div>
+                </fieldset>
+
+                <button type="submit" class="btn-primary btn-full">Submit Request</button>
+            </form>
+        </div>
+    </section>
+</body>
+</html>

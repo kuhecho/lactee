@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMBMS | Secure Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-header">
+            <h2>HMBMS Portal Login</h2>
+            <p>Authorized Medical Staff & Administrators Only</p>
+        </div>
+        
+        <form class="login-form" action="/authenticate" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Enter your username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+
+            <button type="submit" class="btn-primary btn-full">Secure Login</button>
+        </form>
+        
+        <div class="login-footer">
+            <a href="#">Forgot Password?</a>
+            <p>Beneficiaries should use the <a href="index.html">Public Portal</a> for inquiries.</p>
+        </div>
+    </div>
+</body>
+</html>

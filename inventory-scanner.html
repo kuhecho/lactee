@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMBMS | Inventory Scanner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dashboard-body">
+    
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>HMBMS</h2>
+            <p>Staff Portal</p>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="staff-dashboard.html">Dashboard Summary</a></li>
+                <li><a href="inventory-scanner.html" class="active">Inventory & Barcode</a></li>
+                <li><a href="#">Lab Verifications</a></li>
+                <li><a href="#">Safe Dispensing</a></li>
+                <li><a href="#">Donor Profiles</a></li>
+                <li><a href="#">Reports</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <p>Logged in as: <strong>Nurse Clara</strong></p>
+            <a href="login.html" class="logout-btn">Secure Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        <header class="dashboard-header">
+            <h1>Inventory Management</h1>
+            <p>Scan a milk batch barcode to update its processing state or program type.</p>
+        </header>
+
+        <section class="scanner-section">
+            <form action="/api/scan-barcode" method="GET" class="scanner-form">
+                <label for="barcode_input">Ready to Scan:</label>
+                <input type="text" id="barcode_input" name="barcode_id" placeholder="Scan barcode or type ID manually..." autofocus required>
+                <button type="submit" class="btn-primary">Lookup Batch</button>
+            </form>
+        </section>
+
+        <section class="batch-details-section">
+            <div class="batch-card">
+                <div class="batch-header">
+                    <h2>Batch #8493</h2>
+                    <span class="badge badge-raw">Current State: Raw</span>
+                </div>
+                
+                <form action="/api/update-batch" method="POST" class="standard-form update-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Donor DTN</label>
+                            <input type="text" value="DTN-2026-884" readonly class="readonly-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Milk Type</label>
+                            <input type="text" value="Preterm" readonly class="readonly-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Volume (mL)</label>
+                            <input type="number" value="150" readonly class="readonly-input">
+                        </div>
+                    </div>
+
+                    <fieldset>
+                        <legend>Update Batch Information</legend>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="program_type">Program Classification</label>
+                                <select id="program_type" name="program_type">
+                                    <option value="Supsup Todo">Supsup Todo (Community)</option>
+                                    <option value="Milky Way">Milky Way (Hospital)</option>
+                                    <option value="Mom's Act">Mom's Act (Household)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="new_state">Update Processing State</label>
+                                <select id="new_state" name="new_state" required>
+                                    <option value="">Select new state...</option>
+                                    <option value="Pasteurized">Mark as Pasteurized</option>
+                                    <option value="Discarded">Discard Batch</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Save Changes & Log State</button>
+                    </fieldset>
+                </form>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

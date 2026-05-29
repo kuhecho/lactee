@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMBMS | Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">HMBMS</div>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#availability">Check Availability</a></li>
+                <li><a href="donate-milk.html">Donate Milk</a></li>
+                <li><a href="request-milk.html">Request Milk</a></li>
+                <li><a href="status-check.html">Status Check</a></li>
+                <li><a href="login.html" class="btn-primary">Staff/Admin Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Safe, Traceable Human Milk for Infants in Need</h1>
+            <p>Our centralized platform ensures safe milk handling, pasteurization tracking, and distribution to secure the health of every infant.</p>
+            <a href="#availability" class="btn-secondary">Check Milk Availability</a>
+        </div>
+    </section>
+
+    <section id="availability" class="availability-section">
+        <h2>Check Milk Availability</h2>
+        <p>Search our real-time inventory for specific milk types or partner hospitals.</p>
+        
+        <form class="availability-form">
+            <div class="form-group">
+                <label for="milk-type">Required Milk Type</label>
+                <select id="milk-type" name="milk-type">
+                    <option value="">Select type...</option>
+                    <option value="preterm">Preterm</option>
+                    <option value="term">Term</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary">Search Inventory</button>
+        </form>
+        
+        <div id="results-container" class="hidden">
+            </div>
+    </section>
+</body>
+</html>
