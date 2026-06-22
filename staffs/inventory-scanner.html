@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HMBMS | Inventory Scanner</title>
+    <title>HMBMS | Inventory Scanner & Entry</title>
     <link rel="stylesheet" href="../styles.css">
 </head>
 <body class="dashboard-body">
@@ -32,7 +32,7 @@
     <main class="dashboard-main">
         <header class="dashboard-header">
             <h1>Inventory Management</h1>
-            <p>Scan a milk batch barcode to update its processing state or program type.</p>
+            <p>Scan a milk batch barcode to update its processing state, or log a newly received donation.</p>
         </header>
 
         <section class="scanner-section">
@@ -46,28 +46,24 @@
         <section class="batch-details-section">
             <div class="batch-card">
                 <div class="batch-header">
-                    <h2>Batch #8493</h2>
-                    <span class="badge badge-raw">Current State: Raw</span>
+                    <h2>Batch</h2>
                 </div>
                 
                 <form action="/api/update-batch" method="POST" class="standard-form update-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label>Donor DTN</label>
-                            <input type="text" value="DTN-2026-884" readonly class="readonly-input">
+                            <input type="text" placeholder="DTN-2026-884">
                         </div>
                         <div class="form-group">
-                            <label>Milk Type</label>
-                            <input type="text" value="Preterm" readonly class="readonly-input">
+                            <label>Collection Date</label>
+                            <input type="date" id="collection_date" name="collection_date" required>
                         </div>
                         <div class="form-group">
                             <label>Volume (mL)</label>
-                            <input type="number" value="150" readonly class="readonly-input">
+                            <input type="number" placeholder="150">
                         </div>
-                    </div>
-
-                    <fieldset>
-                        <legend>Update Batch Information</legend>
+ 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="program_type">Program Classification</label>
@@ -77,20 +73,56 @@
                                     <option value="Mom's Act">Mom's Act (Household)</option>
                                 </select>
                             </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Save Changes & Log State</button>
+                </form>
+            </div>
+        </section>
+
+        <hr style="margin: 40px 0; border: none; border-top: 1px dashed #ccc;">
+
+        <section class="add-batch-section">
+            <div class="batch-card">
+                <div class="batch-header">
+                    <h2>Log New Milk Batch</h2>
+                    <p>Register a newly received milk donation into the inventory system.</p>
+                </div>
+                
+                <form action="/api/add-batch" method="POST" class="standard-form add-form">
+                    <fieldset>
+                        <legend>Donor & Collection Details</legend>
+                        <div class="form-row">
                             <div class="form-group">
-                                <label for="new_state">Update Processing State</label>
-                                <select id="new_state" name="new_state" required>
-                                    <option value="">Select new state...</option>
-                                    <option value="Pasteurized">Mark as Pasteurized</option>
-                                    <option value="Discarded">Discard Batch</option>
+                                <label for="donor_dtn">Donor DTN (Tracking Number) *</label>
+                                <input type="text" id="donor_dtn" name="donor_dtn" placeholder="e.g., DTN-2026-..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="collection_date">Collection Date *</label>
+                                <input type="date" id="collection_date" name="collection_date" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="volume">Volume (mL) *</label>
+                                <input type="number" id="volume" name="volume" placeholder="e.g., 150" min="1" required>
+                            </div>
+  
+                            <div class="form-group">
+                                <label for="initial_program">Program Classification</label>
+                                <select id="initial_program" name="program_type">
+                                    <option value="Supsup Todo">Supsup Todo (Community)</option>
+                                    <option value="Milky Way">Milky Way (Hospital)</option>
+                                    <option value="Mom's Act">Mom's Act (Household)</option>
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn-primary">Save Changes & Log State</button>
+                        <button type="submit" class="btn-primary">Generate Barcode & Save Batch</button>
                     </fieldset>
                 </form>
             </div>
         </section>
+
     </main>
 </body>
 </html>
