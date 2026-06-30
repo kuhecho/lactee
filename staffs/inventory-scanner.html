@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HMBMS | Inventory Scanner & Entry</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../styles.css">
+    
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body class="dashboard-body">
     
@@ -35,7 +37,9 @@
         </header>
 
         <section class="scanner-section">
-            <form action="/api/scan-barcode" method="GET" class="scanner-form">
+            <div id="reader" style="width: 100%; max-width: 500px; margin-bottom: 20px;"></div>
+
+            <form action="/api/scan-barcode" method="GET" class="scanner-form" id="scan_form">
                 <label for="barcode_input">Ready to Scan:</label>
                 <input type="text" id="barcode_input" name="barcode_id" placeholder="Scan barcode or type ID manually..." autofocus required>
                 <button type="submit" class="btn-primary">Lookup Batch</button>
@@ -56,17 +60,16 @@
                         </div>
                         <div class="form-group">
                             <label>Collection Date</label>
-                            <input type="date" id="collection_date" name="collection_date" required>
+                            <input type="date" id="collection_date_update" name="collection_date" required>
                         </div>
                         <div class="form-group">
                             <label>Volume (mL)</label>
                             <input type="number" placeholder="150">
                         </div>
- 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="program_type">Program Classification</label>
-                                <select id="program_type" name="program_type">
+                                <label for="program_type_update">Program Classification</label>
+                                <select id="program_type_update" name="program_type">
                                     <option value="Supsup Todo">Supsup Todo (Community)</option>
                                     <option value="Milky Way">Milky Way (Hospital)</option>
                                     <option value="Mom's Act">Mom's Act (Household)</option>
@@ -74,6 +77,7 @@
                             </div>
                         </div>
                         <button type="submit" class="btn-primary">Save Changes & Log State</button>
+                    </div>
                 </form>
             </div>
         </section>
@@ -106,7 +110,6 @@
                                 <label for="volume">Volume (mL) *</label>
                                 <input type="number" id="volume" name="volume" placeholder="e.g., 150" min="1" required>
                             </div>
-  
                             <div class="form-group">
                                 <label for="initial_program">Program Classification</label>
                                 <select id="initial_program" name="program_type">
@@ -123,5 +126,37 @@
         </section>
 
     </main>
+
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // 1. Grab the input field
+            const barcodeInput = document.getElementById('barcode_input');
+            
+            // 2. Put the scanned text into the field
+            barcodeInput.value = decodedText;
+            
+            // 3. Stop scanning to prevent duplicate triggers
+            html5QrcodeScanner.clear();
+
+            // 4. (Optional) Automatically submit the form so the user doesn't have to click "Lookup"
+            // document.getElementById('scan_form').submit(); 
+        }
+
+        function onScanFailure(error) {
+            // Silent failure is expected while it's searching for a code
+        }
+
+        // Initialize the scanner (Optimized shape for 1D Barcodes)
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader",
+            { 
+                fps: 10, 
+                qrbox: { width: 300, height: 100 } // Wider box for standard barcodes
+            },
+            false
+        );
+        
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    </script>
 </body>
 </html>
