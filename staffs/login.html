@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HMBMS | Secure Login</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body class="login-body">
     <div class="login-container">
@@ -15,14 +15,16 @@
         
         <form id="loginForm" class="login-form">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required placeholder="Enter your username">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your staff email">
             </div>
             
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required placeholder="Enter your password">
             </div>
+
+            <p id="login-error" style="color: red; font-size: 0.9em; display: none; margin-bottom: 10px;"></p>
 
             <button type="submit" class="btn-primary btn-full">Secure Login</button>
         </form>
@@ -33,13 +35,60 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            // Prevent the form from trying to send data to a server
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // TODO: Replace with your actual Firebase config
+       const firebaseConfig = {
+  apiKey: "AIzaSyCgtXZAe_-Wj0D4Pd-t2BYAU3E2faUF86M",
+  authDomain: "hmbms-f70b5.firebaseapp.com",
+  projectId: "hmbms-f70b5",
+  storageBucket: "hmbms-f70b5.firebasestorage.app",
+  messagingSenderId: "276256441806",
+  appId: "1:276256441806:web:2e3db876c0dddbfb37979f",
+  measurementId: "G-XD87JGC0MZ"
+};
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
             event.preventDefault(); 
             
-            // Redirect to the dashboard
-            window.location.href = 'staff-dashboard.html'; 
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('login-error');
+            const submitBtn = document.querySelector('button[type="submit"]');
+
+            // Reset UI states while processing
+            errorEl.style.display = 'none';
+            submitBtn.textContent = 'Authenticating...';
+            submitBtn.disabled = true;
+
+            try {
+                // Attempt Firebase Login
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                // Success! Redirect to the staff dashboard
+                window.location.href = 'staff-dashboard.html'; 
+            } catch (error) {
+                // Handle Errors gracefully and display them to the user
+                console.error("Login Error:", error);
+                
+                // Make the error user-friendly
+                if(error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorEl.textContent = "Invalid email or password.";
+                } else {
+                    errorEl.textContent = error.message;
+                }
+                
+                errorEl.style.display = 'block';
+                
+                // Reset button so they can try again
+                submitBtn.textContent = 'Secure Login';
+                submitBtn.disabled = false;
+            }
         });
     </script>
 </body>

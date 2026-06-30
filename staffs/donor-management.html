@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HMBMS | Donor Management</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body class="dashboard-body">
     
@@ -31,72 +31,156 @@
 
     <main class="dashboard-main">
         <header class="dashboard-header">
-            <h1>Donor Profiles & Applications</h1>
-            <p>Review public applications and finalize official Donor Tracking Numbers (DTN).</p>
+            <h1>Donor Profiles & Screening</h1>
+            <p>Manage pending applications and view active cleared donors.</p>
         </header>
 
-        <section class="activity-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2>Pending Public Applications</h2>
-                <button class="btn-primary" style="padding: 0.4rem 1rem;">+ Register Walk-In Donor</button>
-            </div>
-            
-            <table class="data-table">
+        <section class="activity-section" style="margin-top: 1rem;">
+            <h2>Pending Screenings</h2>
+            <table class="data-table" id="pending-table">
                 <thead>
                     <tr>
-                        <th>Application ID</th>
-                        <th>Applicant Name</th>
-                        <th>Infant Age</th>
-                        <th>Contact Number</th>
+                        <th>App ID</th>
+                        <th>Name</th>
+                        <th>Program</th>
+                        <th>Contact</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>APP-9938</td>
-                        <td>Maria Santos</td>
-                        <td>4 Months</td>
-                        <td>0917-555-0192</td>
-                        <td><a href="#" class="btn-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">Review & Screen</a></td>
-                    </tr>
-                    <tr>
-                        <td>APP-9939</td>
-                        <td>Elena Cruz</td>
-                        <td>2 Months</td>
-                        <td>0918-444-9921</td>
-                        <td><a href="#" class="btn-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">Review & Screen</a></td>
-                    </tr>
+                    <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
                 </tbody>
             </table>
         </section>
 
-        <section class="activity-section" style="margin-top: 3rem;">
-            <h2>Verified Active Donors</h2>
-            <table class="data-table">
+        <section class="activity-section" style="margin-top: 2rem;">
+            <h2>Active / Cleared Donors</h2>
+            <table class="data-table" id="active-table">
                 <thead>
                     <tr>
-                        <th>DTN</th>
+                        <th>DTN (Tracking No)</th>
                         <th>Name</th>
+                        <th>Program</th>
                         <th>Status</th>
-                        <th>Registered Date</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><strong>DTN-2026-884</strong></td>
-                        <td>Jasmin Reyes</td>
-                        <td><span class="badge badge-passed">Cleared</span></td>
-                        <td>Oct 10, 2026</td>
-                    </tr>
-                    <tr>
-                        <td><strong>DTN-2026-885</strong></td>
-                        <td>Chloe Lim</td>
-                        <td><span class="badge badge-passed">Cleared</span></td>
-                        <td>Oct 12, 2026</td>
-                    </tr>
+                    <tr><td colspan="4" style="text-align: center;">Loading...</td></tr>
                 </tbody>
             </table>
         </section>
     </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // TODO: Replace with your actual Firebase config
+        const firebaseConfig = {
+  apiKey: "AIzaSyCgtXZAe_-Wj0D4Pd-t2BYAU3E2faUF86M",
+  authDomain: "hmbms-f70b5.firebaseapp.com",
+  projectId: "hmbms-f70b5",
+  storageBucket: "hmbms-f70b5.firebasestorage.app",
+  messagingSenderId: "276256441806",
+  appId: "1:276256441806:web:2e3db876c0dddbfb37979f",
+  measurementId: "G-XD87JGC0MZ"
+};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const auth = getAuth(app);
+
+// Global variable to hold the user ID for your database inserts
+window.currentUserEmail = null; 
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // User is signed in.
+        window.currentUserEmail = user.email;
+        
+        // Update the UI Sidebar dynamically
+        const nameDisplay = document.querySelector('.sidebar-footer strong');
+        if(nameDisplay) nameDisplay.textContent = user.email.split('@')[0]; // Quick formatting
+        
+    } else {
+        // User is NOT signed in. Kick them out!
+        window.location.href = "login.html";
+    }
+});
+
+// Attach a real logout function to your logout button
+const logoutBtn = document.querySelector('.logout-btn');
+if(logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => {
+            window.location.href = "login.html";
+        });
+    });
+}
+
+        async function loadDonors() {
+            const pendingTbody = document.querySelector('#pending-table tbody');
+            const activeTbody = document.querySelector('#active-table tbody');
+            pendingTbody.innerHTML = ''; 
+            activeTbody.innerHTML = '';
+
+            const snap = await getDocs(collection(db, "Donor_Profiles"));
+            
+            if(snap.empty) {
+                pendingTbody.innerHTML = '<tr><td colspan="5">No data found.</td></tr>';
+            }
+
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                
+                if (data.screening_status === 'Passed') {
+                    activeTbody.innerHTML += `
+                        <tr>
+                            <td><strong>${data.dtn || 'N/A'}</strong></td>
+                            <td>${data.first_name} ${data.last_name}</td>
+                            <td>${data.program_category}</td>
+                            <td><span class="badge badge-passed">Cleared</span></td>
+                        </tr>
+                    `;
+                } else {
+                    pendingTbody.innerHTML += `
+                        <tr id="donor-${docSnap.id}">
+                            <td>${data.application_id || 'N/A'}</td>
+                            <td>${data.first_name} ${data.last_name}</td>
+                            <td>${data.program_category}</td>
+                            <td>${data.contact_number || 'N/A'}</td>
+                            <td>
+                                <button class="btn-primary" style="padding: 5px 10px;" onclick="clearDonor('${docSnap.id}')">Clear & Assign DTN</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        window.clearDonor = async function(docId) {
+            if(!confirm("Are you sure you want to clear this donor and issue a Tracking Number?")) return;
+            
+            try {
+                // Generate a Donor Tracking Number (DTN)
+                const newDtn = "DTN-" + Math.floor(100000 + Math.random() * 900000);
+                
+                await updateDoc(doc(db, "Donor_Profiles", docId), {
+                    screening_status: 'Passed',
+                    dtn: newDtn
+                });
+                
+                alert(`Donor Cleared! Assigned DTN: ${newDtn}`);
+                loadDonors(); // Reload the tables
+            } catch (error) {
+                console.error("Error updating donor:", error);
+                alert("Failed to update donor status.");
+            }
+        };
+
+        loadDonors();
+    </script>
 </body>
 </html>
