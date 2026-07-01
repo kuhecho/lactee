@@ -6,11 +6,12 @@ const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const appRoot = path.resolve(__dirname, '..', '..');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(appRoot));
 
 app.post('/submit-inquiry', async (req, res) => {
   const payload = req.body;
@@ -168,7 +169,7 @@ function buildMessage(payload, type = 'mother-request') {
 }
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'beneficiaries', 'request-milk.html'));
+  res.sendFile(path.join(appRoot, 'index.html'));
 });
 
 if (require.main === module) {

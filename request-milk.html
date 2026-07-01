@@ -4,109 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HMBMS | Request Milk</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-    <header class="navbar">
-        <div class="logo">HMBMS</div>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="donate.html">Donate Milk</a></li>
-            </ul>
-        </nav>
+    <header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand logo" href="index.html">HMBMS</a>
+            <nav class="ms-auto">
+                <ul class="navbar-nav flex-row gap-3">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="donate-milk.html">Donate Milk</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <section class="form-section">
-        <div class="form-container">
-            <h2>Request Human Milk</h2>
-            <p class="form-subtitle">Please provide your details below. <strong>We will send all status updates and availability alerts directly to your phone via SMS.</strong></p>
-            
-            <form id="request-form" action="/submit-inquiry" method="POST" class="standard-form">
-                
-                <fieldset>
-                    <legend>Beneficiary Details</legend>
+    <section class="form-section py-5">
+        <div class="container">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h2>Request Human Milk</h2>
+                    <p class="form-subtitle">Please provide your details below. <strong>We will send all status updates and availability alerts directly to your phone via SMS.</strong></p>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="mother_name">Mother's Full Name</label>
-                            <input type="text" id="mother_name" name="mother_name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="contact_number">Contact Number (For SMS Updates)</label>
-                            <input type="tel" id="contact_number" name="contact_number" placeholder="e.g., 09123456789" required>
-                        </div>
-                    </div>
+                    <form id="request-form" action="/submit-inquiry" method="POST" class="standard-form">
+                        <fieldset>
+                            <legend>Beneficiary Details</legend>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="mother_name" class="form-label">Mother's Full Name</label>
+                                    <input type="text" id="mother_name" name="mother_name" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="contact_number" class="form-label">Contact Number (For SMS Updates)</label>
+                                    <input type="tel" id="contact_number" name="contact_number" class="form-control" placeholder="e.g., 09123456789" required>
+                                </div>
+                            </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="infant_name">Infant's Full Name</label>
-                            <input type="text" id="infant_name" name="infant_name" required>
-                        </div>
-                        <div class="form-group checkbox-group">
-                            <input type="checkbox" id="is_nicu" name="is_nicu">
-                            <label for="is_nicu">Is the infant currently admitted to the NICU?</label>
-                        </div>
-                    </div>
-                </fieldset>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <label for="infant_name" class="form-label">Infant's Full Name</label>
+                                    <input type="text" id="infant_name" name="infant_name" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center">
+                                    <div class="form-check mt-4">
+                                        <input type="checkbox" id="is_nicu" name="is_nicu" class="form-check-input">
+                                        <label class="form-check-label" for="is_nicu">Is the infant currently admitted to the NICU?</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
 
-                <fieldset>
-                    <legend>Request Details</legend>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="required_milk_type">Required Milk Type</label>
-                            <select id="required_milk_type" name="required_milk_type" required>
-                                <option value="">Select type...</option>
-                                <option value="Preterm">Preterm</option>
-                                <option value="Term">Term</option>
-                            </select>
-                        </div>
-                    </div>
+                        <fieldset>
+                            <legend>Request Details</legend>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="required_milk_type" class="form-label">Required Milk Type</label>
+                                    <select id="required_milk_type" name="required_milk_type" class="form-select" required>
+                                        <option value="">Select type...</option>
+                                        <option value="Preterm">Preterm</option>
+                                        <option value="Term">Term</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                    <div class="form-group full-width">
-                        <label for="medical_notes">Additional Medical Notes (Optional)</label>
-                        <textarea id="medical_notes" name="medical_notes" rows="3" placeholder="Any specific dietary requirements or medical context..."></textarea>
-                    </div>
-                </fieldset>
+                            <div class="mt-3">
+                                <label for="medical_notes" class="form-label">Additional Medical Notes (Optional)</label>
+                                <textarea id="medical_notes" name="medical_notes" rows="3" class="form-control" placeholder="Any specific dietary requirements or medical context..."></textarea>
+                            </div>
+                        </fieldset>
 
-                <button type="submit" class="btn-primary btn-full">Submit Request</button>
-                <p id="form-message" class="form-subtitle" style="margin-top: 1rem;"></p>
-            </form>
+                        <button type="submit" class="btn btn-primary w-100">Submit Request</button>
+                        <p id="form-message" class="form-subtitle mt-3"></p>
+                    </form>
+                </div>
+            </div>
         </div>
     </section>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: 'AIzaSyCgtXZAe_-Wj0D4Pd-t2BYAU3E2faUF86M',
+            authDomain: 'hmbms-f70b5.firebaseapp.com',
+            projectId: 'hmbms-f70b5',
+            storageBucket: 'hmbms-f70b5.firebasestorage.app',
+            messagingSenderId: '276256441806',
+            appId: '1:276256441806:web:2e3db876c0dddbfb37979f',
+            measurementId: 'G-XD87JGC0MZ'
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
         const form = document.getElementById('request-form');
         const messageBox = document.getElementById('form-message');
 
         form.addEventListener('submit', async function (event) {
             event.preventDefault();
+
             const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
+            const payload = {
+                mother_name: formData.get('mother_name') || '',
+                contact_number: formData.get('contact_number') || '',
+                infant_name: formData.get('infant_name') || '',
+                is_nicu: formData.get('is_nicu') === 'on',
+                required_milk_type: formData.get('required_milk_type') || '',
+                medical_notes: formData.get('medical_notes') || '',
+                status: 'Pending',
+                created_at: serverTimestamp(),
+                source: 'public-request'
+            };
 
             messageBox.textContent = 'Submitting request...';
             messageBox.style.color = '#4a5568';
 
             try {
-                const response = await fetch('/submit-inquiry', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    messageBox.textContent = 'Request received. SMS updates are being prepared.';
-                    messageBox.style.color = '#2f855a';
-                    form.reset();
-                } else {
-                    messageBox.textContent = result.message || 'Submission failed.';
-                    messageBox.style.color = '#c53030';
+                if (!auth.currentUser) {
+                    await signInAnonymously(auth);
                 }
+                await addDoc(collection(db, 'Milk_Inquiries'), payload);
+                messageBox.textContent = 'Request received and added to the HMBMS staff portal.';
+                messageBox.style.color = '#2f855a';
+                form.reset();
             } catch (error) {
-                messageBox.textContent = 'Submission failed. Please try again later.';
+                console.error('Request submission failed:', error);
+                const message = error?.code === 'permission-denied'
+                    ? 'Firestore permissions are blocking the submission. Please enable authenticated writes for this project.'
+                    : error?.message || 'Submission failed. Please try again later.';
+                messageBox.textContent = message;
                 messageBox.style.color = '#c53030';
             }
         });

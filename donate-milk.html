@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HMBMS | Donate Milk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <style>
         /* Base Styles */
         body { font-family: system-ui, -apple-system, sans-serif; color: #2d3748; line-height: 1.5; padding: 20px; }
-        .form-section { max-width: 800px; margin: 0 auto; }
+        .form-section { max-width: 1000px; margin: 0 auto; }
         .program-options { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
         .program-card { border: 1px solid #cbd5e0; padding: 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
         .program-card:hover { border-color: #4a5568; }
@@ -33,12 +35,14 @@
     </style>
 </head>
 <body>
-    <section class="form-section">
-        <div class="form-container">
-            <h2>Become a Mother-Donor</h2>
-            <p class="form-subtitle">Your donation can save lives. Please select a program to view your registration requirements.</p>
-            
-            <form id="donor-form" action="/submit-donor-profile" method="POST">
+    <section class="form-section py-5">
+        <div class="container">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h2>Become a Mother-Donor</h2>
+                    <p class="form-subtitle">Your donation can save lives. Please select a program to view your registration requirements.</p>
+                    
+                    <form id="donor-form" action="/submit-donor-profile" method="POST">
                 
                 <!-- STEP 1: Program Selection -->
                 <div id="step-1">
@@ -229,33 +233,48 @@
                     <button type="submit" class="btn-primary">Submit Application</button>
                 </div>
 
-                <p id="donor-form-message" style="margin-top: 1rem; text-align: center;"></p>
-            </form>
+                    <p id="donor-form-message" style="margin-top: 1rem; text-align: center;"></p>
+                    </form>
+                </div>
+            </div>
         </div>
     </section>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: 'AIzaSyCgtXZAe_-Wj0D4Pd-t2BYAU3E2faUF86M',
+            authDomain: 'hmbms-f70b5.firebaseapp.com',
+            projectId: 'hmbms-f70b5',
+            storageBucket: 'hmbms-f70b5.firebasestorage.app',
+            messagingSenderId: '276256441806',
+            appId: '1:276256441806:web:2e3db876c0dddbfb37979f',
+            measurementId: 'G-XD87JGC0MZ'
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
         const donorForm = document.getElementById('donor-form');
         const programRadios = document.querySelectorAll('input[name="program_category"]');
         const programCards = document.querySelectorAll('.program-card');
-        
         const flowSupsup = document.getElementById('flow-supsup');
         const flowMilkyway = document.getElementById('flow-milkyway');
         const flowMomsAct = document.getElementById('flow-momsact');
 
-        // Toggle form paths based on selection
         programRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
-                // Update card UI
                 programCards.forEach(card => card.classList.remove('selected'));
                 e.target.closest('.program-card').classList.add('selected');
 
-                // Hide all flows first
                 flowSupsup.classList.remove('active');
                 flowMilkyway.classList.remove('active');
                 flowMomsAct.classList.remove('active');
 
-                // Show appropriate flow & manage required attributes
                 if (e.target.value === 'supsup_todo') {
                     flowSupsup.classList.add('active');
                     toggleRequired(flowSupsup, true);
@@ -275,22 +294,19 @@
             });
         });
 
-        // Helper function to dynamically add/remove HTML 'required' attributes
         function toggleRequired(container, isRequired) {
             const inputs = container.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
-                // Check if the input is marked as optional via dataset
-                const isOptional = input.dataset.optional === "true";
+                const isOptional = input.dataset.optional === 'true';
 
                 if (isRequired && input.type !== 'checkbox' && !isOptional) {
                     input.setAttribute('required', 'true');
                 } else {
                     input.removeAttribute('required');
                 }
-                
-                // Explicitly require checkboxes that are for consent
+
                 if (isRequired && (
-                    input.name === 'st_digital_consent' || 
+                    input.name === 'st_digital_consent' ||
                     input.name === 'mw_sync_consent' ||
                     input.name === 'ma_call_consent'
                 )) {
@@ -299,95 +315,67 @@
             });
         }
 
-        // Handle Submission
         donorForm.addEventListener('submit', async function (event) {
             event.preventDefault();
-            
+
             const formData = new FormData(donorForm);
             const activeCategory = formData.get('program_category');
-            
-            // Filter payload to only include data from the active program flow
-            const payload = { program_category: activeCategory };
-            
+            const msgEl = document.getElementById('donor-form-message');
+
+            const payload = {
+                program_category: activeCategory,
+                screening_status: 'Pending',
+                created_at: serverTimestamp(),
+                source: 'public-donation',
+                first_name: '',
+                last_name: '',
+                contact_number: ''
+            };
+
             for (let [key, value] of formData.entries()) {
                 if (activeCategory === 'supsup_todo' && key.startsWith('st_')) payload[key] = value;
                 if (activeCategory === 'milky_way' && key.startsWith('mw_')) payload[key] = value;
                 if (activeCategory === 'moms_act' && key.startsWith('ma_')) payload[key] = value;
             }
 
-            // Checkbox logic for payload (un-checked boxes don't show up in FormData naturally)
             if (activeCategory === 'supsup_todo') {
+                payload.first_name = formData.get('st_first_name') || '';
+                payload.last_name = formData.get('st_last_name') || '';
+                payload.contact_number = formData.get('st_contact_number') || '';
                 payload.st_passed_lab = formData.has('st_passed_lab');
                 payload.st_digital_consent = formData.has('st_digital_consent');
             } else if (activeCategory === 'milky_way') {
+                payload.first_name = formData.get('mw_first_name') || '';
+                payload.last_name = formData.get('mw_last_name') || '';
+                payload.contact_number = formData.get('mw_patient_id') || '';
                 payload.mw_sync_consent = formData.has('mw_sync_consent');
             } else if (activeCategory === 'moms_act') {
+                payload.first_name = formData.get('ma_first_name') || '';
+                payload.last_name = formData.get('ma_last_name') || '';
+                payload.contact_number = formData.get('ma_contact_number') || '';
                 payload.ma_call_consent = formData.has('ma_call_consent');
             }
 
-            console.log("Submitting payload:", payload);
-            document.getElementById('donor-form-message').textContent = "Form payload ready! Check browser console.";
+            msgEl.textContent = 'Submitting application...';
+            msgEl.style.color = '#2563EB';
+
+            try {
+                if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+                const docRef = await addDoc(collection(db, 'Donor_Profiles'), payload);
+                msgEl.textContent = `Application submitted successfully. Reference: ${docRef.id}`;
+                msgEl.style.color = '#047857';
+                donorForm.reset();
+            } catch (error) {
+                console.error('Donation submission failed:', error);
+                const message = error?.code === 'permission-denied'
+                    ? 'Firestore permissions are blocking the submission. Please enable authenticated writes for this project.'
+                    : error?.message || 'Submission failed. Please try again later.';
+                msgEl.textContent = message;
+                msgEl.style.color = '#dc2626';
+            }
         });
     </script>
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCgtXZAe_-Wj0D4Pd-t2BYAU3E2faUF86M",
-    authDomain: "hmbms-f70b5.firebaseapp.com",
-    projectId: "hmbms-f70b5",
-    storageBucket: "hmbms-f70b5.firebasestorage.app",
-    messagingSenderId: "276256441806",
-    appId: "1:276256441806:web:2e3db876c0dddbfb37979f",
-    measurementId: "G-XD87JGC0MZ"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const donorForm = document.getElementById('donor-form');
-    // ... [Keep your existing UI toggle code for programRadios here] ...
-
-    donorForm.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        const msgEl = document.getElementById('donor-form-message');
-        msgEl.textContent = "Submitting application...";
-        msgEl.style.color = "blue";
-
-        const formData = new FormData(donorForm);
-        const activeCategory = formData.get('program_category');
-        
-        // Base mapping to match schema
-        const payload = { 
-            program_category: activeCategory,
-            application_id: "APP-" + Math.floor(1000 + Math.random() * 9000), // Temp ID
-            screening_status: 'Pending Lab',
-            created_at: serverTimestamp()
-        };
-        
-        // Map flow specific inputs to Schema fields (first_name, last_name, contact_number)
-        const prefix = activeCategory === 'supsup_todo' ? 'st_' : (activeCategory === 'milky_way' ? 'mw_' : 'ma_');
-        
-        payload.first_name = formData.get(`${prefix}first_name`);
-        payload.last_name = formData.get(`${prefix}last_name`);
-        payload.contact_number = formData.get(`${prefix}contact_number`) || formData.get('ma_contact_number'); // Schema mapping
-        
-        // Add all other raw form data just in case
-        for (let [key, value] of formData.entries()) {
-            if (key.startsWith(prefix)) payload[key] = value;
-        }
-
-        try {
-            await addDoc(collection(db, "Donor_Profiles"), payload);
-            msgEl.textContent = `Success! Your Application ID is ${payload.application_id}. Please save this.`;
-            msgEl.style.color = "green";
-            donorForm.reset();
-        } catch (error) {
-            console.error("Error adding document: ", error);
-            msgEl.textContent = "Error submitting application. Please try again.";
-            msgEl.style.color = "red";
-        }
-    });
-</script>
 </body>
 </html>
