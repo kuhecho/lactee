@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HMBMS | Safe Dispensing</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body class="dashboard-body">
     
@@ -24,50 +24,144 @@
             </ul>
         </nav>
         <div class="sidebar-footer">
-            <p>Logged in as: <strong>Nurse Clara</strong></p>
+            <p>Logged in as: <strong id="staff-name">Nurse Clara</strong></p>
             <a href="login.html" class="logout-btn">Secure Logout</a>
         </div>
     </aside>
 
     <main class="dashboard-main">
         <header class="dashboard-header">
-            <h1>Safe Dispensing Gateway</h1>
-            <p style="color: #DC2626; font-weight: 600;">Strict Protocol: Ensure all IDs match perfectly. Only "Passed Lab Test" batches may be dispensed.</p>
+            <h1>Safe Dispensing & Matching</h1>
+            <p>Match requested milk inquiries with safe, cleared inventory batches.</p>
         </header>
 
-        <section class="batch-details-section">
-            <div class="batch-card" style="border-top-color: #059669;">
-                <h2>Process Prescription Fulfillment</h2>
-                <form action="/api/dispense-milk" method="POST" class="standard-form update-form">
-                    
-                    <fieldset>
-                        <legend>1. Beneficiary Validation</legend>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="inquiry_id">Inquiry Ticket / Beneficiary ID</label>
-                                <input type="text" id="inquiry_id" name="inquiry_id" placeholder="e.g., INQ-10294" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="prescription_id">Doctor's Prescription ID</label>
-                                <input type="text" id="prescription_id" name="prescription_id" placeholder="Scan or type Rx ID" required>
-                            </div>
-                        </div>
-                    </fieldset>
+        <section class="form-section" style="max-width: 600px; margin-top: 2rem;">
+            <h2>Log Dispensing Transaction</h2>
+            <form id="dispense-form" class="update-form">
+                <div class="form-group">
+                    <label for="inquiry_id">Inquiry / Request ID</label>
+                    <input type="text" id="inquiry_id" name="inquiry_id" placeholder="e.g., INQ-1002" required>
+                </div>
+                <div class="form-group">
+                    <label for="prescription_id">Medical Prescription ID</label>
+                    <input type="text" id="prescription_id" name="prescription_id" placeholder="e.g., RX-9988" required>
+                </div>
+                <div class="form-group">
+                    <label for="batch_barcode">Scan Batch Barcode to Dispense</label>
+                    <input type="text" id="batch_barcode" name="batch_barcode" placeholder="Scan or type barcode" required>
+                </div>
+                
+                <p id="dispense-message" style="font-weight: bold; margin-bottom: 1rem;"></p>
 
-                    <fieldset style="margin-top: 1.5rem;">
-                        <legend>2. Inventory Validation</legend>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="batch_barcode">Scan Physical Milk Batch Barcode</label>
-                                <input type="text" id="batch_barcode" name="batch_barcode" placeholder="Scan bottle..." required>
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    <button type="submit" class="btn-primary btn-full" style="background-color: #059669;">Verify Match & Dispense Milk</button>
-                </form>
-            </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Verify & Dispense Milk</button>
+            </form>
         </section>
     </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // TODO: Replace with your actual Firebase config
+        const firebaseConfig = {
+  apiKey: "AIzaSyCgtXZAe_-Wj0D4Pd-t2BYAU3E2faUF86M",
+  authDomain: "hmbms-f70b5.firebaseapp.com",
+  projectId: "hmbms-f70b5",
+  storageBucket: "hmbms-f70b5.firebasestorage.app",
+  messagingSenderId: "276256441806",
+  appId: "1:276256441806:web:2e3db876c0dddbfb37979f",
+  measurementId: "G-XD87JGC0MZ"
+};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const auth = getAuth(app);
+
+// Global variable to hold the user ID for your database inserts
+window.currentUserEmail = null; 
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // User is signed in.
+        window.currentUserEmail = user.email;
+        
+        // Update the UI Sidebar dynamically
+        const nameDisplay = document.querySelector('.sidebar-footer strong');
+        if(nameDisplay) nameDisplay.textContent = user.email.split('@')[0]; // Quick formatting
+        
+    } else {
+        // User is NOT signed in. Kick them out!
+        window.location.href = "login.html";
+    }
+});
+
+// Attach a real logout function to your logout button
+const logoutBtn = document.querySelector('.logout-btn');
+if(logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => {
+            window.location.href = "login.html";
+        });
+    });
+}
+
+        document.getElementById('dispense-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const msgEl = document.getElementById('dispense-message');
+            msgEl.style.color = "blue";
+            msgEl.textContent = "Verifying batch safety...";
+            
+            const inquiryId = document.getElementById('inquiry_id').value;
+            const rxId = document.getElementById('prescription_id').value;
+            const barcode = document.getElementById('batch_barcode').value;
+
+            try {
+                // 1. Validate Batch Barcode & State
+                const qBatch = query(collection(db, "Milk_Batches"), where("barcode_id", "==", barcode));
+                const batchSnap = await getDocs(qBatch);
+                
+                if (batchSnap.empty) {
+                    msgEl.style.color = "red";
+                    return msgEl.textContent = "Error: Barcode not found in inventory system.";
+                }
+
+                const batchDoc = batchSnap.docs[0];
+                const batchData = batchDoc.data();
+                
+                if (batchData.state !== "Passed Lab Test") {
+                    msgEl.style.color = "red";
+                    return msgEl.textContent = `CRITICAL WARNING: Milk is unsafe to dispense! Current state: ${batchData.state}`;
+                }
+
+                // 2. Write to Dispensing_Records
+                await addDoc(collection(db, "Dispensing_Records"), {
+                    batch_id: batchDoc.id,
+                    inquiry_id: inquiryId,
+                    prescription_id: rxId,
+                    staff_user_id: "System_User", // Will update this with Auth later
+                    dispensed_at: serverTimestamp()
+                });
+
+                // 3. Update Batch State so it can't be dispensed again
+                await updateDoc(doc(db, "Milk_Batches", batchDoc.id), {
+                    state: "Dispensed"
+                });
+
+                // 4. Update the Milk Inquiry Status (Optional based on schema)
+                // Note: You might want a query here to find the inquiry and mark it "Completed"
+
+                msgEl.style.color = "green";
+                msgEl.textContent = "Success! Dispensing record logged securely. Milk is safe to release.";
+                e.target.reset();
+
+            } catch (error) {
+                console.error("Dispensing error: ", error);
+                msgEl.style.color = "red";
+                msgEl.textContent = "A system error occurred during validation.";
+            }
+        });
+    </script>
 </body>
 </html>

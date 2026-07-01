@@ -329,5 +329,65 @@
             document.getElementById('donor-form-message').textContent = "Form payload ready! Check browser console.";
         });
     </script>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgtXZAe_-Wj0D4Pd-t2BYAU3E2faUF86M",
+    authDomain: "hmbms-f70b5.firebaseapp.com",
+    projectId: "hmbms-f70b5",
+    storageBucket: "hmbms-f70b5.firebasestorage.app",
+    messagingSenderId: "276256441806",
+    appId: "1:276256441806:web:2e3db876c0dddbfb37979f",
+    measurementId: "G-XD87JGC0MZ"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const donorForm = document.getElementById('donor-form');
+    // ... [Keep your existing UI toggle code for programRadios here] ...
+
+    donorForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const msgEl = document.getElementById('donor-form-message');
+        msgEl.textContent = "Submitting application...";
+        msgEl.style.color = "blue";
+
+        const formData = new FormData(donorForm);
+        const activeCategory = formData.get('program_category');
+        
+        // Base mapping to match schema
+        const payload = { 
+            program_category: activeCategory,
+            application_id: "APP-" + Math.floor(1000 + Math.random() * 9000), // Temp ID
+            screening_status: 'Pending Lab',
+            created_at: serverTimestamp()
+        };
+        
+        // Map flow specific inputs to Schema fields (first_name, last_name, contact_number)
+        const prefix = activeCategory === 'supsup_todo' ? 'st_' : (activeCategory === 'milky_way' ? 'mw_' : 'ma_');
+        
+        payload.first_name = formData.get(`${prefix}first_name`);
+        payload.last_name = formData.get(`${prefix}last_name`);
+        payload.contact_number = formData.get(`${prefix}contact_number`) || formData.get('ma_contact_number'); // Schema mapping
+        
+        // Add all other raw form data just in case
+        for (let [key, value] of formData.entries()) {
+            if (key.startsWith(prefix)) payload[key] = value;
+        }
+
+        try {
+            await addDoc(collection(db, "Donor_Profiles"), payload);
+            msgEl.textContent = `Success! Your Application ID is ${payload.application_id}. Please save this.`;
+            msgEl.style.color = "green";
+            donorForm.reset();
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            msgEl.textContent = "Error submitting application. Please try again.";
+            msgEl.style.color = "red";
+        }
+    });
+</script>
 </body>
 </html>

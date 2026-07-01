@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMBMS | Inventory Scanner & Entry</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body class="dashboard-body">
+    
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>HMBMS</h2>
+            <p>Staff Portal</p>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="staff-dashboard.html">Dashboard Summary</a></li>
+                <li><a href="inventory-scanner.html" class="active">Inventory & Barcode</a></li>
+                <li><a href="lab-verifications.html">Lab Verifications</a></li>
+                <li><a href="safe-dispensing.html">Safe Dispensing</a></li>
+                <li><a href="donor-management.html">Donor Profiles</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <p>Logged in as: <strong>Nurse Clara</strong></p>
+            <a href="login.html" class="logout-btn">Secure Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        <header class="dashboard-header">
+            <h1>Inventory Management</h1>
+            <p>Scan a milk batch barcode to update its processing state, or log a newly received donation.</p>
+        </header>
+
+        <section class="scanner-section">
+            <div id="reader" style="width: 100%; max-width: 500px; margin-bottom: 20px;"></div>
+
+            <form action="/api/scan-barcode" method="GET" class="scanner-form" id="scan_form">
+                <label for="barcode_input">Ready to Scan:</label>
+                <input type="text" id="barcode_input" name="barcode_id" placeholder="Scan barcode or type ID manually..." autofocus required>
+                <button type="submit" class="btn-primary">Lookup Batch</button>
+            </form>
+        </section>
+
+        <section class="batch-details-section">
+            <div class="batch-card">
+                <div class="batch-header">
+                    <h2>Batch</h2>
+                </div>
+                
+                <form action="/api/update-batch" method="POST" class="standard-form update-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Donor DTN</label>
+                            <input type="text" placeholder="DTN-2026-884">
+                        </div>
+                        <div class="form-group">
+                            <label>Collection Date</label>
+                            <input type="date" id="collection_date_update" name="collection_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Volume (mL)</label>
+                            <input type="number" placeholder="150">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="program_type_update">Program Classification</label>
+                                <select id="program_type_update" name="program_type">
+                                    <option value="Supsup Todo">Supsup Todo (Community)</option>
+                                    <option value="Milky Way">Milky Way (Hospital)</option>
+                                    <option value="Mom's Act">Mom's Act (Household)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Save Changes & Log State</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <hr style="margin: 40px 0; border: none; border-top: 1px dashed #ccc;">
+
+        <section class="add-batch-section">
+            <div class="batch-card">
+                <div class="batch-header">
+                    <h2>Log New Milk Batch</h2>
+                    <p>Register a newly received milk donation into the inventory system.</p>
+                </div>
+                
+                <form action="/api/add-batch" method="POST" class="standard-form add-form">
+                    <fieldset>
+                        <legend>Donor & Collection Details</legend>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="donor_dtn">Donor DTN (Tracking Number) *</label>
+                                <input type="text" id="donor_dtn" name="donor_dtn" placeholder="e.g., DTN-2026-..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="collection_date">Collection Date *</label>
+                                <input type="date" id="collection_date" name="collection_date" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="volume">Volume (mL) *</label>
+                                <input type="number" id="volume" name="volume" placeholder="e.g., 150" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="initial_program">Program Classification</label>
+                                <select id="initial_program" name="program_type">
+                                    <option value="Supsup Todo">Supsup Todo (Community)</option>
+                                    <option value="Milky Way">Milky Way (Hospital)</option>
+                                    <option value="Mom's Act">Mom's Act (Household)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Generate Barcode & Save Batch</button>
+                    </fieldset>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // 1. Grab the input field
+            const barcodeInput = document.getElementById('barcode_input');
+            
+            // 2. Put the scanned text into the field
+            barcodeInput.value = decodedText;
+            
+            // 3. Stop scanning to prevent duplicate triggers
+            html5QrcodeScanner.clear();
+
+            // 4. (Optional) Automatically submit the form so the user doesn't have to click "Lookup"
+            // document.getElementById('scan_form').submit(); 
+        }
+
+        function onScanFailure(error) {
+            // Silent failure is expected while it's searching for a code
+        }
+
+        // Initialize the scanner (Optimized shape for 1D Barcodes)
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader",
+            { 
+                fps: 10, 
+                qrbox: { width: 300, height: 100 } // Wider box for standard barcodes
+            },
+            false
+        );
+        
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    </script>
+</body>
+</html>
